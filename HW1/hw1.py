@@ -36,7 +36,6 @@ def q1():
     
     g = np.sinc(t * 1e20)
     new_a = np.convolve(x, g, mode='same')
-    # new_a = np.fft.fft(x)
     new_x = np.convolve(new_a, g, mode='same')
     plt.figure()
     plt.subplot(211)
@@ -49,4 +48,6 @@ def q1():
     plt.plot(t, new_x)
     plt.show()
 
-q1()
+
+if __name__ == "__main__":
+    q1()

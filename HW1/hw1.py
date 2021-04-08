@@ -34,9 +34,9 @@ def q1():
     plt.show()
     
     
-    g = np.sinc(t * 1e20)
-    new_a = np.convolve(x, g, mode='same')
-    new_x = np.convolve(new_a, g, mode='same')
+    s = np.sinc(t * 1e20)
+    new_a = np.convolve(x, s, mode='same')
+    new_x = np.convolve(new_a, s, mode='same')
     plt.figure()
     plt.subplot(211)
     plt.title(r'$x(t) = \sum a_n g(t-n)$')
@@ -48,6 +48,23 @@ def q1():
     plt.plot(t, new_x)
     plt.show()
 
+    X = np.fft.fft(x)
+    S = np.fft.fft(s)
+    G = np.fft.fft(g)
+    A = np.fft.fft(new_a)
+    recon_X = G * (1./(np.conjugate(S) * G)) * S * X
+    recon_x = np.fft.ifft(recon_X)
+
+    plt.figure()
+    plt.subplot(211)
+    plt.title(r'$x(t) = \sum a_n g(t-n)$')
+    plt.xlabel('t')
+    plt.plot(t, x)
+    plt.subplot(212)
+    plt.title(r'$x(t)$ sampled with $s(t)$ & reconstructed with $g(t)$')
+    plt.xlabel('t')
+    plt.plot(t, recon_x)
+    plt.show()
 
 if __name__ == "__main__":
     q1()

@@ -51,7 +51,6 @@ def q1():
     X = np.fft.fft(x)
     S = np.fft.fft(s)
     G = np.fft.fft(g)
-    A = np.fft.fft(new_a)
     recon_X = G * (1./(np.conjugate(S) * G)) * S * X
     recon_x = np.fft.ifft(recon_X)
 

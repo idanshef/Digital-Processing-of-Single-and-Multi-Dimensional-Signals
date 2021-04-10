@@ -27,9 +27,9 @@ save_plots_to_disk = True
 
 plt.figure(figsize=(15.0, 10.0))
 plt.subplot(211)
-plt.title(r'$a_n$')
-plt.xlabel('n')
-plt.plot(a)
+plt.title(r'$x(t)$')
+plt.xlabel('t')
+plt.plot(t, x)
 plt.subplot(212)
 plt.title(r"$\|X(e^{2\pi jf})\|$")
 plt.xlabel('f')

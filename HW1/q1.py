@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy.fft.helper import fftshift
@@ -25,6 +26,11 @@ dpi=600
 show_interactive_plots = False
 save_plots_to_disk = True
 
+if save_plots_to_disk:
+    output_folder = "Q1"
+    if not os.path.exists(output_folder):
+        os.mkdir(output_folder)
+
 plt.figure(figsize=(15.0, 10.0))
 plt.subplot(211)
 plt.title(r'$x(t)$')
@@ -35,7 +41,7 @@ plt.title(r"$\|X(e^{2\pi jf})\|$")
 plt.xlabel('f')
 plt.plot(sample_freq, x_freq)
 if save_plots_to_disk:
-    plt.savefig("fig1.png", dpi=dpi)
+    plt.savefig(os.path.join(output_folder, "fig1.png"), dpi=dpi)
 if show_interactive_plots:
     plt.show()
 
@@ -53,7 +59,7 @@ plt.title(r'$x(t) = \sum \tilde{a_n} sinc(t-n)$')
 plt.xlabel('t')
 plt.plot(t, new_x)
 if save_plots_to_disk:
-    plt.savefig("fig2.png", dpi=dpi)
+    plt.savefig(os.path.join(output_folder, "fig2.png"), dpi=dpi)
 if show_interactive_plots:
     plt.show()
 
@@ -73,6 +79,6 @@ plt.title(r'$x(t)$ sampled with $s(t)$ & reconstructed with $g(t)$')
 plt.xlabel('t')
 plt.plot(t, recon_x)
 if save_plots_to_disk:
-    plt.savefig("fig3.png", dpi=dpi)
+    plt.savefig(os.path.join(output_folder, "fig3.png"), dpi=dpi)
 if show_interactive_plots:
     plt.show()

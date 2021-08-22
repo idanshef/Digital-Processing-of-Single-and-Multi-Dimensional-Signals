@@ -54,29 +54,31 @@ def wavelet_transform(patches, wavelet_type=WaveletType.Daubechies1):
     return r_coeffs, g_coeffs, b_coeffs
 
 
-def algo(data_loader, M, N, model, loss_func, optimizer):
-    for batch in data_loader:
-        patches = split_to_patches(img, M, N)
-        patches = normalize_patches(patches)
+def train(data_loader, M, N, model, loss_func, optimizer):
+    channel2lvl3 = lambda patch: torch.stack((torch.tensor(patch[0]), torch.tensor(patch[1][0]),
+                                                torch.tensor(patch[1][1]), torch.tensor(patch[1][2])))
+    channel2lvl = lambda patch, lvl: torch.stack((torch.tensor(patch[4 - lvl][0]), torch.tensor(patch[4 - lvl][1]), 
+                                                    torch.tensor(patch[4 - lvl][2])))
+    
+    for batch in data_loader["train"]:
+        imgs = batch["image"]
+        # img = 0
+        # patches = split_to_patches(img, M, N)
+        # patches = normalize_patches(patches)
         
-        model.train()
-        
-        channel2lvl3 = lambda patch: torch.stack((torch.tensor(patch[0]), torch.tensor(patch[1][0]),
-                                                    torch.tensor(patch[1][1]), torch.tensor(patch[1][2])))
-        channel2lvl = lambda patch, lvl: torch.stack((torch.tensor(patch[4 - lvl][0]), torch.tensor(patch[4 - lvl][1]), 
-                                                        torch.tensor(patch[4 - lvl][2])))
-        for patch in patches:
-            patch_r, patch_g, patch_b = wavelet_transform(patch)
-            lvl1tensor = torch.cat((channel2lvl(patch_r, 1), channel2lvl(patch_g, 1), channel2lvl(patch_b, 1))).unsqueeze(0).to(torch.float)
-            lvl2tensor = torch.cat((channel2lvl(patch_r, 2), channel2lvl(patch_g, 2), channel2lvl(patch_b, 2))).unsqueeze(0).to(torch.float)
-            lvl3tensor = torch.cat((channel2lvl3(patch_r), channel2lvl3(patch_g), channel2lvl3(patch_b))).unsqueeze(0).to(torch.float)
+        # model.train()
+        # for patch in patches:
+        #     patch_r, patch_g, patch_b = wavelet_transform(patch)
+        #     lvl1tensor = torch.cat((channel2lvl(patch_r, 1), channel2lvl(patch_g, 1), channel2lvl(patch_b, 1))).unsqueeze(0).to(torch.float)
+        #     lvl2tensor = torch.cat((channel2lvl(patch_r, 2), channel2lvl(patch_g, 2), channel2lvl(patch_b, 2))).unsqueeze(0).to(torch.float)
+        #     lvl3tensor = torch.cat((channel2lvl3(patch_r), channel2lvl3(patch_g), channel2lvl3(patch_b))).unsqueeze(0).to(torch.float)
             
-            optimizer.zero_grad()
-            pred_patch = model(lvl1tensor, lvl2tensor, lvl3tensor)
-            loss = loss_func(pred_patch, patch)
+        #     optimizer.zero_grad()
+        #     pred_patch = model(lvl1tensor, lvl2tensor, lvl3tensor)
+        #     loss = loss_func(pred_patch, patch)
             
-            loss.backward()
-            optimizer.step()
+        #     loss.backward()
+        #     optimizer.step()
 
 
 if __name__ == "__main__":
@@ -98,7 +100,7 @@ if __name__ == "__main__":
     # optimizer = optim.SGD(model.parameters(), weight_decay=1e-8, lr=0.01)
     optimizer = optim.Adam(model.parameters(), 1e-4)
     epochs = 100
-    batch_size = 8
+    batch_size = 1
     
     dataset = load_data(data_dir, batch_size)
-    algo(dataset, M, N, model, loss, optimizer)
+    train(dataset, M, N, model, loss, optimizer)

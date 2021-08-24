@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from gdn import GDN
@@ -14,9 +15,8 @@ class Encoder(nn.Module):
         output1 = self.encoder1(x_s1)
         output2 = self.encoder2(x_s2)
         output3 = self.encoder3(x_s3)
-        # TODO: concat outputs
         # TODO: add noise
-        output = 0
+        output = torch.hstack((output1, output2, output3))
         return output
 
 class Encoder1(nn.Module):

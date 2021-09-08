@@ -15,7 +15,6 @@ class Encoder(nn.Module):
         output1 = self.encoder1(x_s1)
         output2 = self.encoder2(x_s2)
         output3 = self.encoder3(x_s3)
-        # TODO: add noise
         output = torch.hstack((output1, output2, output3))
         return output
 
@@ -104,3 +103,11 @@ class Encoder3(nn.Module):
         x = self.gdn_32(x)
         x = self.conv_32_32(x)
         return x
+
+if __name__ == "__main__":
+    net = Encoder("cpu")
+    s3 = torch.rand(1, 12, 32, 32)
+    s2 = torch.rand(1, 9, 64, 64)
+    s1 = torch.rand(1, 9, 128, 128)
+    out = net(s1, s2, s3)
+    print(out.shape)

@@ -8,10 +8,6 @@ from loss import CompressionLoss
 from metrics import psnr, msssim
 
 
-class WaveletType:
-    Daubechies1 = 0
-
-
 class Trainer:
     def __init__(self, data_dir, log_dir=None) -> None:
         
@@ -23,7 +19,7 @@ class Trainer:
         self.loss_func = CompressionLoss()
         self.optimizer = optim.Adam(self.model.parameters(), 1e-4)
         self.epochs = 100
-        self.batch_size = {"train": 64, "valid": 1}
+        self.batch_size = {"train": 128, "valid": 1}
 
         self.data_loaders = create_dataloaders(data_dir, self.batch_size)
         self.writer = SummaryWriter(log_dir)
@@ -49,19 +45,25 @@ class Trainer:
 
                 full_loss, recon_loss_val, entropy_loss_val = self.loss_func(recon_images, images, symbols)
                 
-                averages['psnr'] += psnr(images, recon_images)
-                averages["msssim"] += msssim(images, recon_images)
-                averages["full loss"] += full_loss
+                images = (images + 1.) * 0.5
+                recon_images = (recon_images + 1.) * 0.5
+
+                averages['psnr'] += psnr(images, recon_images).item()
+                averages["msssim"] += msssim(images, recon_images).item()
+                averages["full loss"] += full_loss.item()
                 averages["recon loss"] += recon_loss_val
                 averages["entropy loss"] += entropy_loss_val
             
             for key in averages:
                 averages[key] /= num_batches
 
+            print("Validation scores:", averages)
             self.writer.add_scalars("Loss/valid", {"full loss": averages["full loss"], "recon loss": averages["recon loss"],
                                                    "entropy loss": averages["entropy loss"]}, epoch)
+            self.writer.add_scalar("PSNR/valid", averages['psnr'], epoch)
+            self.writer.add_scalar("MSSSIM/valid", averages['msssim'], epoch)
             self.writer.add_images("Images/GT", images, epoch)
-            self.writer.add_images("Images/reconstructed", recon_images, epoch)    
+            self.writer.add_images("Images/reconstructed", recon_images, epoch)
 
     def train(self):
         
@@ -83,12 +85,13 @@ class Trainer:
 
                 full_loss_val = full_loss.item()
                 if batch_idx % 20 == 0:
-                    print(f"Batch {batch_idx + 1}/{num_batches}: Full loss: {full_loss_val}, recon loss: {recon_loss_val}, entropy loss: {entropy_loss_val}")
+                    print(f"Batch {batch_idx + 1}/{num_batches}: Full loss: {full_loss_val}, Recon loss: {recon_loss_val}, Entropy loss: {entropy_loss_val}")
 
                 self.writer.add_scalars("Loss/train", {"full loss": full_loss_val, "recon loss": recon_loss_val,
                                                        "entropy loss": entropy_loss_val}, batch_idx)
             self.validate(epoch)
-
+        
+        self.writer.flush()
         return self.model
 
 

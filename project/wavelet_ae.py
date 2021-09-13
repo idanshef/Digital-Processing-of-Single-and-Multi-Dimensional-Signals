@@ -29,7 +29,7 @@ class WaveletAutoEncoder(nn.Module):
         resolutions.append(torch.stack(torch.split(out_s1, 3, dim=1), dim=2))
         resolutions.append(torch.stack(torch.split(out_s2, 3, dim=1), dim=2))
         resolutions.append(torch.stack(torch.split(out_s3[:, 3:, ...], 3, dim=1), dim=2))
-        return self.wavelet_recon((yl, resolutions))
+        return torch.tanh(self.wavelet_recon((yl, resolutions)))
 
         
     def forward(self, img):

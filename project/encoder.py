@@ -21,32 +21,37 @@ class Encoder(nn.Module):
 class Encoder1(nn.Module):
     def __init__(self, device):
         super().__init__()
-        self.gdn_16 = GDN(16, device)
-        self.gdn_32 = GDN(32, device)
-        self.conv_9_16 = nn.Conv2d(9, 16, kernel_size=3, padding=1)
-        self.conv_16_16 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
-        self.conv_16_32 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
-        self.conv_32_32 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
-        
+
+        self.block1 = nn.Sequential(nn.Conv2d(9, 16, kernel_size=3, padding=1),
+                                    GDN(16, device),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1)
+                                    )
+
+        self.block2 = nn.Sequential(GDN(16, device),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1),
+                                    nn.Conv2d(16, 32, kernel_size=3, padding=1)
+                                    )
+
+        self.block3 = nn.Sequential(GDN(32, device),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1)
+                                    )
+
+        self.block4 = nn.Sequential(GDN(32, device),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1),
+                                    GDN(32, device),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1)
+                                    )        
 
     def forward(self, x):
-        x = self.conv_9_16(x)
-        x = self.gdn_16(x)
-        x = self.conv_16_16(x)
-        x = self.conv_16_16(x)
+        x = self.block1(x)
         x = F.interpolate(x, scale_factor=0.5)
-        x = self.gdn_16(x)
-        x = self.conv_16_16(x)
-        x = self.conv_16_32(x)
+        x = self.block2(x)
         x = F.interpolate(x, scale_factor=0.5)
-        x = self.gdn_32(x)
-        x = self.conv_32_32(x)
-        x = self.conv_32_32(x)
+        x = self.block3(x)
         x = F.interpolate(x, scale_factor=0.5)
-        x = self.gdn_32(x)
-        x = self.conv_32_32(x)
-        x = self.gdn_32(x)
-        x = self.conv_32_32(x)
+        x = self.block4(x)
         x = F.interpolate(x, scale_factor=0.5)
         return x
 
@@ -54,54 +59,61 @@ class Encoder1(nn.Module):
 class Encoder2(nn.Module):
     def __init__(self, device):
         super().__init__()
-        self.gdn_16 = GDN(16, device)
-        self.gdn_32 = GDN(32, device)
-        self.conv_9_16 = nn.Conv2d(9, 16, kernel_size=3, padding=1)
-        self.conv_16_16 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
-        self.conv_16_32 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
-        self.conv_32_32 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
+        self.block1 = nn.Sequential(nn.Conv2d(9, 16, kernel_size=3, padding=1),
+                                    GDN(16, device),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1)          
+                                    )
+
+        self.block2 = nn.Sequential(GDN(16, device),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1),
+                                    nn.Conv2d(16, 32, kernel_size=3, padding=1)
+                                    )
+
+        self.block3 = nn.Sequential(GDN(32, device),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1)
+                                    )
+        
+        self.block4 = nn.Sequential(GDN(32, device),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1)
+                                    )
 
     def forward(self, x):
-        x = self.conv_9_16(x)
-        x = self.gdn_16(x)
-        x = self.conv_16_16(x)
-        x = self.conv_16_16(x)
+        x = self.block1(x)
         x = F.interpolate(x, scale_factor=0.5)
-        x = self.gdn_16(x)
-        x = self.conv_16_16(x)
-        x = self.conv_16_32(x)
+        x = self.block2(x)
         x = F.interpolate(x, scale_factor=0.5)
-        x = self.gdn_32(x)
-        x = self.conv_32_32(x)
-        x = self.conv_32_32(x)
+        x = self.block3(x)
         x = F.interpolate(x, scale_factor=0.5)
-        x = self.gdn_32(x)
-        x = self.conv_32_32(x)
+        x = self.block4(x)
         return x
 
 
 class Encoder3(nn.Module):
     def __init__(self, device):
         super().__init__()
-        self.gdn_16 = GDN(16, device)
-        self.gdn_32 = GDN(32, device)
-        self.conv_12_16 = nn.Conv2d(12, 16, kernel_size=3, padding=1)
-        self.conv_16_16 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
-        self.conv_16_32 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
-        self.conv_32_32 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
+        self.block1 = nn.Sequential(nn.Conv2d(12, 16, kernel_size=3, padding=1),
+                                    GDN(16, device),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1)
+                                    )
+
+        self.block2 = nn.Sequential(GDN(16, device),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1),
+                                    nn.Conv2d(16, 32, kernel_size=3, padding=1)
+                                    )
+
+        self.block3 = nn.Sequential(GDN(32, device),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1)
+                                    )
 
     def forward(self, x):
-        x = self.conv_12_16(x)
-        x = self.gdn_16(x)
-        x = self.conv_16_16(x)
-        x = self.conv_16_16(x)
+        x = self.block1(x)
         x = F.interpolate(x, scale_factor=0.5)
-        x = self.gdn_16(x)
-        x = self.conv_16_16(x)
-        x = self.conv_16_32(x)
+        x = self.block2(x)
         x = F.interpolate(x, scale_factor=0.5)
-        x = self.gdn_32(x)
-        x = self.conv_32_32(x)
+        x = self.block3(x)
         return x
 
 if __name__ == "__main__":

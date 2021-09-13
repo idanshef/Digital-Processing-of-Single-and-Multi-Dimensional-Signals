@@ -12,7 +12,7 @@ class Decoder(nn.Module):
         self.decoder3 = Decoder3(device)
     
     def forward(self, x):
-        assert x.shape[1] == 96, "number of channels must be 32"
+        assert x.shape[1] == 96, "number of channels must be 96"
 
         x1, x2, x3 = torch.split(x, 32, dim=1)
 
@@ -24,33 +24,44 @@ class Decoder(nn.Module):
 class Decoder1(nn.Module):
     def __init__(self, device):
         super().__init__()
-        self.igdn_16 = GDN(16, device, inverse=True)
-        self.igdn_32 = GDN(32, device, inverse=True)
-        self.conv_32_32 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
-        self.conv_32_16 = nn.Conv2d(32, 16, kernel_size=3, padding=1)
-        self.conv_16_16 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
+
+        self.conv0 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
+
+        self.block1 = nn.Sequential(GDN(32, device, inverse=True),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1),
+                                    GDN(32, device, inverse=True),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1)
+                                    )
+
+        self.block2 = nn.Sequential(nn.Conv2d(32, 32, kernel_size=3, padding=1),
+                                    GDN(32, device, inverse=True),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1)
+                                    )
+        
+        self.block3 = nn.Sequential(nn.Conv2d(32, 16, kernel_size=3, padding=1),
+                                    GDN(16, device, inverse=True),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1)
+                                    )
+
+        self.block4 = nn.Sequential(nn.Conv2d(16, 16, kernel_size=3, padding=1),
+                                    GDN(16, device, inverse=True),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1)
+                                    )
+
         self.out_conv = nn.Conv2d(16, 9, kernel_size=1)
         
 
     def forward(self, x):
-        x = self.conv_32_32(x)
+        x = self.conv0(x)
         x = F.interpolate(x, scale_factor=2)
-        x = self.igdn_32(x)
-        x = self.conv_32_32(x)
-        x = self.igdn_32(x)
-        x = self.conv_32_32(x)
+        x = self.block1(x)
         x = F.interpolate(x, scale_factor=2)
-        x = self.conv_32_32(x)
-        x = self.igdn_32(x)
-        x = self.conv_32_32(x)
+        x = self.block2(x)
         x = F.interpolate(x, scale_factor=2)
-        x = self.conv_32_16(x)
-        x = self.igdn_16(x)
-        x = self.conv_16_16(x)
+        x = self.block3(x)
         x = F.interpolate(x, scale_factor=2)
-        x = self.conv_16_16(x)
-        x = self.igdn_16(x)
-        x = self.conv_16_16(x)
+        x = self.block4(x)
+
         x = self.out_conv(x)
         return x
 
@@ -58,29 +69,37 @@ class Decoder1(nn.Module):
 class Decoder2(nn.Module):
     def __init__(self, device):
         super().__init__()
-        self.igdn_16 = GDN(16, device, inverse=True)
-        self.igdn_32 = GDN(32, device, inverse=True)
-        self.conv_32_32 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
-        self.conv_32_16 = nn.Conv2d(32, 16, kernel_size=3, padding=1)
-        self.conv_16_16 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
+        self.block1 = nn.Sequential(nn.Conv2d(32, 32, kernel_size=3, padding=1),
+                                    GDN(32, device, inverse=True),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1)
+                                    )
+        
+        self.block2 = nn.Sequential(nn.Conv2d(32, 32, kernel_size=3, padding=1),
+                                    GDN(32, device, inverse=True),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1)
+                                    )
+
+        self.block3 = nn.Sequential(nn.Conv2d(32, 16, kernel_size=3, padding=1),
+                                    GDN(16, device, inverse=True),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1)
+                                    )
+        
+        self.block4 = nn.Sequential(nn.Conv2d(16, 16, kernel_size=3, padding=1),
+                                    GDN(16, device, inverse=True),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1)
+                                    )
+
         self.out_conv = nn.Conv2d(16, 9, kernel_size=1)
 
     def forward(self, x):
-        x = self.conv_32_32(x)
-        x = self.igdn_32(x)
-        x = self.conv_32_32(x)
+        x = self.block1(x)
         x = F.interpolate(x, scale_factor=2)
-        x = self.conv_32_32(x)
-        x = self.igdn_32(x)
-        x = self.conv_32_32(x)
+        x = self.block2(x)
         x = F.interpolate(x, scale_factor=2)
-        x = self.conv_32_16(x)
-        x = self.igdn_16(x)
-        x = self.conv_16_16(x)
+        x = self.block3(x)
         x = F.interpolate(x, scale_factor=2)
-        x = self.conv_16_16(x)
-        x = self.igdn_16(x)
-        x = self.conv_16_16(x)
+        x = self.block4(x)
+
         x = self.out_conv(x)
         return x
 
@@ -88,25 +107,30 @@ class Decoder2(nn.Module):
 class Decoder3(nn.Module):
     def __init__(self, device):
         super().__init__()
-        self.igdn_16 = GDN(16, device, inverse=True)
-        self.igdn_32 = GDN(32, device, inverse=True)
-        self.conv_32_32 = nn.Conv2d(32, 32, kernel_size=3, padding=1)
-        self.conv_32_16 = nn.Conv2d(32, 16, kernel_size=3, padding=1)
-        self.conv_16_16 = nn.Conv2d(16, 16, kernel_size=3, padding=1)
+        self.block1 = nn.Sequential(nn.Conv2d(32, 32, kernel_size=3, padding=1),
+                                    GDN(32, device, inverse=True),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1)
+                                    )
+        
+        self.block2 = nn.Sequential(nn.Conv2d(32, 32, kernel_size=3, padding=1),
+                                    GDN(32, device, inverse=True),
+                                    nn.Conv2d(32, 32, kernel_size=3, padding=1)
+                                    )
+
+        self.block3 = nn.Sequential(nn.Conv2d(32, 16, kernel_size=3, padding=1),
+                                    GDN(16, device, inverse=True),
+                                    nn.Conv2d(16, 16, kernel_size=3, padding=1)
+                                    )
+
         self.out_conv = nn.Conv2d(16, 12, kernel_size=1)
 
     def forward(self, x):
-        x = self.conv_32_32(x)
-        x = self.igdn_32(x)
-        x = self.conv_32_32(x)
+        x = self.block1(x)
         x = F.interpolate(x, scale_factor=2)
-        x = self.conv_32_32(x)
-        x = self.igdn_32(x)
-        x = self.conv_32_32(x)
+        x = self.block2(x)
         x = F.interpolate(x, scale_factor=2)
-        x = self.conv_32_16(x)
-        x = self.igdn_16(x)
-        x = self.conv_16_16(x)
+        x = self.block3(x)
+        
         x = self.out_conv(x)
         return x
 

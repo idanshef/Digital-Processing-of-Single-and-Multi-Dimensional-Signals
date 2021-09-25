@@ -12,9 +12,9 @@ class Encoder(nn.Module):
         self.encoder3 = Encoder3(device)
     
     def forward(self, x_s1, x_s2, x_s3):
-        output1 = self.encoder1(x_s1)
-        output2 = self.encoder2(x_s2)
-        output3 = self.encoder3(x_s3)
+        output1 = torch.tanh(self.encoder1(x_s1))
+        output2 = torch.tanh(self.encoder2(x_s2))
+        output3 = torch.tanh(self.encoder3(x_s3))
         output = torch.hstack((output1, output2, output3))
         return output
 

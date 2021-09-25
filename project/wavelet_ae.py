@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from encoder import Encoder
 from decoder import Decoder
 from pytorch_wavelets import DWTForward, DWTInverse
@@ -9,7 +10,7 @@ class WaveletAutoEncoder(nn.Module):
     def __init__(self, device, num_bits=10, wavelet_string="db1"):
         super().__init__()
         self.num_bits = num_bits
-        self.noise_scale = 1. / 2. ** num_bits
+        self.noise_scale = 1. / 2. ** (num_bits - 1)
         self.wavelet_levels = 3
         self.wavelet_decomp = DWTForward(J=self.wavelet_levels, wave=wavelet_string)
         self.wavelet_recon = DWTInverse(wave=wavelet_string)
@@ -41,13 +42,14 @@ class WaveletAutoEncoder(nn.Module):
             quantization_noise = (2. * torch.rand_like(y) - 1.) * self.noise_scale
             y += quantization_noise
         else:
-            # y = (y * 2**self.num_bits).type(torch.uint8)
-            pass
+            y = ((0.5 * y + 0.5) * 2**self.num_bits).type(torch.int16)
+            y = 2. * (y.float() / 2**self.num_bits) - 1.
 
         out_s1, out_s2, out_s3 = self.decoder(y)
         out = self.wavelet_reconstruct_image(out_s1, out_s2, out_s3)
 
-        return out, y
+        # wavelet_loss = F.mse_loss(out_s1, x_s1) + F.mse_loss(out_s2, x_s2) + F.mse_loss(out_s3, x_s3)
+        return out, y#, wavelet_loss
 
 
 if __name__ == "__main__":

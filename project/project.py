@@ -19,7 +19,7 @@ class Trainer:
         self.loss_func = CompressionLoss()
         self.optimizer = optim.Adam(self.model.parameters(), 1e-4)
         self.epochs = 100
-        self.batch_size = {"train": 128, "valid": 1}
+        self.batch_size = {"train": 8, "valid": 1}
 
         self.data_loaders = create_dataloaders(data_dir, self.batch_size)
         self.writer = SummaryWriter(log_dir)
@@ -79,13 +79,13 @@ class Trainer:
                 recon_patch, symbols = self.model(patches)
 
                 full_loss, recon_loss_val, entropy_loss_val = self.loss_func(recon_patch, patches, symbols)
-                
+                # full_loss += wavelet_loss
                 full_loss.backward()
                 self.optimizer.step()
 
                 full_loss_val = full_loss.item()
                 if batch_idx % 20 == 0:
-                    print(f"Batch {batch_idx + 1}/{num_batches}: Full loss: {full_loss_val}, Recon loss: {recon_loss_val}, Entropy loss: {entropy_loss_val}")
+                    print(f"Batch {batch_idx + 1}/{num_batches}: Full loss: {full_loss_val}, Recon loss: {recon_loss_val}, Entropy loss: {entropy_loss_val}")#, Wavelet loss: {wavelet_loss.item()}")
 
                 self.writer.add_scalars("Loss/train", {"full loss": full_loss_val, "recon loss": recon_loss_val,
                                                        "entropy loss": entropy_loss_val}, batch_idx)

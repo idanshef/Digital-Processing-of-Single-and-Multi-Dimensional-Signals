@@ -3,7 +3,6 @@ from glob import glob
 from torch.utils.data import Dataset
 from torchvision.io import read_image
 from torch.utils.data import DataLoader
-from torch.nn.functional import pad
 
 class CLICDataset(Dataset):
     def __init__(self, data_dir, transforms=None):
@@ -20,11 +19,6 @@ class CLICDataset(Dataset):
 
         height, width = image.shape[-2:]
 
-        # if not height % 64 == 0 or not width % 64 == 0:
-        #     width_pad = 64 - width % 64
-        #     height_pad = 64 - height % 64
-        #     padding = (0, width_pad, 0, height_pad)
-        #     image = pad(image, padding)
 
         if not height % 64 == 0:
             image = image[:, :-(height % 64)]
@@ -63,8 +57,8 @@ def create_dataloaders(data_dir, batch_size):
 if __name__ == "__main__":
     dataset_dir = "/home/orweiser/university/Digital-Processing-of-Single-and-Multi-Dimensional-Signals/data/valid"
     dataset = CLICDataset(dataset_dir)
-    img = dataset[5]
-    print(img.shape)
-    print(img.shape[1] % 64)
-    print(img.shape[2] % 64)
-    # print(len(dataset))
+    # img = dataset[5]
+    # print(img.shape)
+    # print(img.shape[1] % 64)
+    # print(img.shape[2] % 64)
+    print(len(dataset))

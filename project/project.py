@@ -82,11 +82,14 @@ class Trainer:
                 images = images.to(self.device)
                 recon_images, _ = self.model(images)
 
+                images = (images + 1.) * 0.5
+                recon_images = (recon_images + 1.) * 0.5
+
                 msssim_score += msssim(recon_images, images)
                 psnr_score += psnr(recon_images, images)
                 
                 if save_images:
-                    recon_images = (((recon_images + 1.) / 2.) * 255).to(torch.uint8)
+                    recon_images = (recon_images * 255).to(torch.uint8)
                     write_png(recon_images.squeeze(0).cpu(), os.path.join(images_dir, "%d.png" % (batch_idx + 1)))
 
         return psnr_score.item() / num_batches, msssim_score.item() / num_batches

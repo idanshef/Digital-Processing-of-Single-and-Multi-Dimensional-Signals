@@ -1,5 +1,6 @@
 import os
 from glob import glob
+import torch
 from torch.utils.data import Dataset
 from torchvision.io import read_image
 from torch.utils.data import DataLoader
@@ -55,10 +56,25 @@ def create_dataloaders(data_dir, batch_size):
 
 
 if __name__ == "__main__":
+    import os
+    from torchvision.io import write_png
     dataset_dir = "/home/orweiser/university/Digital-Processing-of-Single-and-Multi-Dimensional-Signals/data/valid"
     dataset = CLICDataset(dataset_dir)
+
+    output_path = os.path.join(os.path.dirname(dataset_dir), "cropped_valid")
+    if not os.path.exists(output_path):
+        os.mkdir(output_path)
+    
+    for i in range(len(dataset)):
+        image = dataset[i]
+        image = (image + 1.) * 0.5
+        image = (image * 255.).to(torch.uint8)
+        print("saving image %d/%d" % (i + 1, len(dataset)))
+        write_png(image, os.path.join(output_path, "%d.png" % (i+1)))
+
     # img = dataset[5]
     # print(img.shape)
     # print(img.shape[1] % 64)
     # print(img.shape[2] % 64)
-    print(len(dataset))
+    # print(len(dataset))
+
